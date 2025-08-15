@@ -1,14 +1,9 @@
-FreshCart 🛒
-
-
-
-
-
+FreshCart
 
 
 FreshCart is a modern web application delivering fresh and trusted groceries. It features a seamless shopping experience, seller management, and a fully responsive UI.
 🌟 Live Demo
-Check it out here: FreshCart Live
+Check it out here: FreshCart Live https://fresh-cart-snowy.vercel.app/
 ⚡ Features
 User Features
 🛒 Add and remove items from the cart
