@@ -48,6 +48,7 @@ const Login = () => {
           <span className="text-primary ">User</span>{" "}
           {state === "login" ? "Login" : "Sign Up"}
         </p>
+
         {state === "register" && (
           <div className="w-full">
             <p>Name</p>
@@ -61,6 +62,7 @@ const Login = () => {
             />
           </div>
         )}
+
         <div className="w-full ">
           <p>Email</p>
           <input
@@ -72,6 +74,7 @@ const Login = () => {
             required
           />
         </div>
+
         <div className="w-full ">
           <p>Password</p>
           <input
@@ -83,6 +86,20 @@ const Login = () => {
             required
           />
         </div>
+
+        {/* Forgot Password Link (only in login mode) */}
+        {state === "login" && (
+          <p
+            onClick={() => {
+              setShowUserLogin(false); // close modal
+              navigate("/forgot-password"); // go to forgot password page
+            }}
+            className="text-primary cursor-pointer text-sm self-end -mt-2"
+          >
+            Forgot password?
+          </p>
+        )}
+
         {state === "register" ? (
           <p>
             Already have account?{" "}
@@ -104,6 +121,7 @@ const Login = () => {
             </span>
           </p>
         )}
+
         <button className="bg-primary hover:bg-primary-dull transition-all text-white w-full py-2 rounded-md cursor-pointer">
           {state === "register" ? "Create Account" : "Login"}
         </button>

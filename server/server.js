@@ -11,6 +11,10 @@ import cartRouter from "./routes/cartRote.js";
 import addressRouter from "./routes/adressRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import { stripeWebhooks } from "./controllers/orderController.js";
+import contactRouter from "./routes/contactRoute.js"; // ✅ proper name
+import { submitRating } from "./controllers/productController.js";
+
+
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -49,6 +53,8 @@ app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/order", orderRouter);
+app.use("/api/contact", contactRouter);
+productRouter.post("/rate", submitRating);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

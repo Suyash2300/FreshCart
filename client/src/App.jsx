@@ -18,6 +18,9 @@ import AddProduct from "./pages/seller/AddProduct";
 import ProductList from "./pages/seller/ProductList";
 import Orders from "./pages/seller/Orders";
 import Loading from "./components/Loading";
+import ContactForm from "./components/ContactForm";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const App = () => {
   const isSellerPath = useLocation().pathname.includes("seller");
@@ -40,6 +43,16 @@ const App = () => {
           <Route path="/add-address" element={<AddAddress />} />
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/loader" element={<Loading />} />
+          <Route
+            path="/contact"
+            element={
+              <div className="px-6 md:px-16 lg:px-24 xl:px-32">
+                <ContactForm />
+              </div>
+            }
+          />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           <Route
             path="/seller"

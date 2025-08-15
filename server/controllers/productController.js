@@ -57,3 +57,29 @@ export const changeStock = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+export const submitRating = async (req, res) => {
+  try {
+    const { productId, userId, rating } = req.body;
+
+    const product = await Product.findById(productId);
+    if (!product)
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+
+    // Remove previous rating by the same user
+    product.ratings = product.ratings.filter(
+      (r) => r.userId.toString() !== userId
+    );
+
+    // Add new rating
+    product.ratings.push({ userId, rating });
+
+    await product.save();
+    res.json({ success: true, message: "Rating submitted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

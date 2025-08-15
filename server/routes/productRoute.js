@@ -6,6 +6,7 @@ import {
   changeStock,
   productById,
   productList,
+  submitRating,
 } from "../controllers/productController.js";
 
 const productRouter = express.Router();
@@ -14,5 +15,8 @@ productRouter.post("/add", upload.array(["images"]), authSeller, addProduct);
 productRouter.get("/list", productList);
 productRouter.get("/id", productById);
 productRouter.post("/stock", authSeller, changeStock);
+
+// ⭐ Add rating route here
+productRouter.post("/rate", submitRating);
 
 export default productRouter;

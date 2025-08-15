@@ -9,6 +9,12 @@ const productSchema = new mongoose.Schema(
     image: { type: Array, required: true },
     category: { type: String, required: true },
     inStock: { type: Boolean, default: true },
+    ratings: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
+        rating: { type: Number, min: 1, max: 5 },
+      },
+    ],
   },
   {
     timestamps: true,

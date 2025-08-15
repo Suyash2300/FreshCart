@@ -5,12 +5,27 @@ import { assets } from "../assets/assets";
 import ProductCard from "../components/ProductCard";
 
 const ProductDetails = () => {
-  const { products, navigate, currency, addToCart } = useAppContext();
+  const { products, navigate, currency, addToCart, user, axios } =
+    useAppContext();
   const { id } = useParams();
   const [thumbnail, setThumbnail] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+
   const product = products.find((item) => item._id === id);
 
+  // Calculate average rating
+  useEffect(() => {
+    if (product?.ratings?.length) {
+      const avg =
+        product.ratings.reduce((acc, r) => acc + r.rating, 0) /
+        product.ratings.length;
+      setAverageRating(avg);
+    }
+  }, [product?.ratings]);
+
+  // Set related products
   useEffect(() => {
     if (products.length > 0 && product) {
       const productsCopy = products.filter(
@@ -20,9 +35,31 @@ const ProductDetails = () => {
     }
   }, [products, product]);
 
+  // Set main thumbnail
   useEffect(() => {
     setThumbnail(product?.image?.[0] || null);
   }, [product]);
+
+  // Handle rating submission
+  const handleRating = async (rate) => {
+    if (!user) return alert("Login to rate");
+    try {
+      await axios.post("/api/product/rate", {
+        productId: product._id,
+        userId: user._id,
+        rating: rate,
+      });
+      alert("Rating submitted!");
+      // Update local average rating immediately
+      const newRatings = [...(product.ratings || []), { rating: rate }];
+      const avg =
+        newRatings.reduce((acc, r) => acc + r.rating, 0) / newRatings.length;
+      setAverageRating(avg);
+    } catch (error) {
+      console.log(error);
+      alert("Error submitting rating");
+    }
+  };
 
   if (!product) return null;
 
@@ -66,19 +103,25 @@ const ProductDetails = () => {
         <div className="text-sm w-full md:w-1/2">
           <h1 className="text-3xl font-medium">{product.name}</h1>
 
-          {/* Ratings */}
-          <div className="flex items-center gap-0.5 mt-1">
+          {/* Star Ratings */}
+          <div className="flex items-center gap-1 mt-1">
             {Array(5)
               .fill("")
-              .map((_, i) => (
-                <img
-                  key={i}
-                  src={i < 4 ? assets.star_icon : assets.star_dull_icon}
-                  alt=""
-                  className="md:w-4 w-3.5"
-                />
-              ))}
-            <p className="text-base ml-2">(4)</p>
+              .map((_, i) => {
+                const starFilled = i < Math.round(hoverRating || averageRating);
+                return (
+                  <img
+                    key={i}
+                    src={starFilled ? assets.star_icon : assets.star_dull_icon}
+                    alt=""
+                    className="w-4 h-4 cursor-pointer"
+                    onMouseEnter={() => setHoverRating(i + 1)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => handleRating(i + 1)}
+                  />
+                );
+              })}
+            <p className="ml-2 text-base">({product.ratings?.length || 0})</p>
           </div>
 
           {/* Price */}
