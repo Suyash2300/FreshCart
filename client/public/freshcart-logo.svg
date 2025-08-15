@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 64" role="img" aria-labelledby="title desc">
+  <title id="title">FreshCart logo</title>
+  <desc id="desc">Green shopping cart with leaf icon followed by the word FreshCart; Fresh is green and Cart is black.</desc>
+  <defs>
+    <style>
+      .green { fill: #28a745; } /* primary green */
+      .black { fill: #111111; } /* near-black for better contrast */
+      text { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif; font-weight: 700; }
+    </style>
+  </defs>
+
+  <!-- Icon group (fits in a 64x64 box) -->
+  <g transform="translate(0,0)">
+    <!-- Cart frame -->
+    <path class="green" d="M10 10h18l4 22h28l4-12H28l-2-10H10zM36 48a6 6 0 1 1-12 0 6 6 0 0 1 12 0zm26 0a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/>
+    <!-- Leaf inside cart -->
+    <path class="green" d="M48 18c-9 2-16 8-18 16 9-4 15-3 20-1-2 4-6 7-10 9 9 1 18-6 16-16-1-5-4-7-8-8z" opacity="0.95"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="80" y="46" font-size="32" letter-spacing="0.2">
+    <tspan class="green">Fresh</tspan><tspan class="black">Cart</tspan>
+  </text>
+</svg>

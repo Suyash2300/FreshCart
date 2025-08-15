@@ -21,6 +21,7 @@ import Loading from "./components/Loading";
 import ContactForm from "./components/ContactForm";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import About from "./pages/About"; // import at the top
 
 const App = () => {
   const isSellerPath = useLocation().pathname.includes("seller");
@@ -53,6 +54,7 @@ const App = () => {
           />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/about" element={<About />} />
 
           <Route
             path="/seller"
