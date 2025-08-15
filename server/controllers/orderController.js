@@ -10,51 +10,96 @@ export const placeOrderCOD = async (req, res) => {
     if (!address || items.length === 0) {
       return res.json({ success: false, message: "Invalid Data" });
     }
-    // calculate amount using items
-    let amount = await items.reduce(async (acc, item) => {
-      const product = await Product.findById(item.product);
-      return (await acc) + product.offerPrice * item.quantity;
-    }, 0);
 
-    // add tac charge 2%
+    // Validate stock
+    for (const item of items) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        return res.json({ success: false, message: "Product not found" });
+      }
+      if (!product.inStock) {
+        return res.json({
+          success: false,
+          message: `${product.name} is out of stock!`,
+        });
+      }
+    }
+
+    // Calculate total amount
+    let amount = 0;
+    for (const item of items) {
+      const product = await Product.findById(item.product);
+      amount += product.offerPrice * item.quantity;
+    }
+    // Add tax 2%
     amount += Math.floor(amount * 0.02);
-    await Order.create({
+
+    // Create order
+    const order = await Order.create({
       userId,
       items,
       amount,
       address,
       paymentType: "COD",
     });
-    return res.json({ success: true, message: "Order Placed Successfully" });
-  } catch (error) {
-    return res.json({ success: false, message: error.message });
 
-    console.log(error);
+    // Reduce stock
+    for (const item of items) {
+      const product = await Product.findById(item.product);
+      product.stock -= item.quantity;
+      if (product.stock <= 0) product.inStock = false;
+      await product.save();
+    }
+
+    return res.json({
+      success: true,
+      message: "Order Placed Successfully",
+      order,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.json({ success: false, message: error.message });
   }
 };
 
-// place order stripe: /api/order/stripe
 export const placeOrderStripe = async (req, res) => {
   try {
     const { userId, items, address } = req.body;
     const { origin } = req.headers;
+
     if (!address || items.length === 0) {
       return res.json({ success: false, message: "Invalid Data" });
     }
+
     let productData = [];
-    // calculate amount using items
-    let amount = await items.reduce(async (acc, item) => {
+
+    // Validate stock and prepare productData
+    for (const item of items) {
       const product = await Product.findById(item.product);
+      if (!product) {
+        return res.json({ success: false, message: "Product not found" });
+      }
+      if (!product.inStock) {
+        return res.json({
+          success: false,
+          message: `${product.name} is out of stock!`,
+        });
+      }
       productData.push({
         name: product.name,
         price: product.offerPrice,
         quantity: item.quantity,
       });
-      return (await acc) + product.offerPrice * item.quantity;
-    }, 0);
+    }
 
-    // add tac charge 2%
-    amount += Math.floor(amount * 0.02);
+    // Calculate total amount
+    let amount = productData.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
+    amount += Math.floor(amount * 0.02); // tax 2%
+
+    // Create order in DB
     const order = await Order.create({
       userId,
       items,
@@ -63,24 +108,29 @@ export const placeOrderStripe = async (req, res) => {
       paymentType: "Online",
       isPaid: false,
     });
-    //stripe getway
+
+    // Reduce stock for each product
+    for (const item of items) {
+      const product = await Product.findById(item.product);
+      product.stock -= item.quantity;
+      if (product.stock <= 0) product.inStock = false;
+      await product.save();
+    }
+
+    // Initialize Stripe
     const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
 
-    //create line items for stripe
-    const line_items = productData.map((item) => {
-      return {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: item.name,
-          },
-          unit_amount: Math.floor(item.price + item.price * 0.02) * 100,
-        },
-        quantity: item.quantity,
-      };
-    });
+    // Prepare line items for Stripe
+    const line_items = productData.map((item) => ({
+      price_data: {
+        currency: "usd",
+        product_data: { name: item.name },
+        unit_amount: Math.floor(item.price + item.price * 0.02) * 100,
+      },
+      quantity: item.quantity,
+    }));
 
-    //create session
+    // Create Stripe session
     const session = await stripeInstance.checkout.sessions.create({
       line_items,
       mode: "payment",
@@ -94,9 +144,8 @@ export const placeOrderStripe = async (req, res) => {
 
     return res.json({ success: true, url: session.url });
   } catch (error) {
+    console.error(error);
     return res.json({ success: false, message: error.message });
-
-    console.log(error);
   }
 };
 
