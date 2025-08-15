@@ -1,15 +1,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
-@import "tailwindcss";
 
+/* Tailwind base styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom font override */
 * {
   font-family: "Outfit", sans-serif;
 }
 
-@theme {
+/* Custom colors as CSS variables (still usable) */
+:root {
   --color-primary: #4fbf8b;
   --color-primary-dull: #44ae7c;
 }
 
-.no-scrollbar::-weblit-scrollbar {
+/* No scrollbar for certain elements */
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
