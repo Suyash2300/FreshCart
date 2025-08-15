@@ -18,7 +18,10 @@ await connectDB();
 await connectCloudinar();
 
 //Allow multiple origins
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://fresh-cart-snowy.vercel.app",
+];
 
 app.post("/stripe", express.raw({ type: "application/json" }), stripeWebhooks);
 
@@ -27,8 +30,15 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173", // your frontend URL
-    credentials: true, // allow cookies
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
 
