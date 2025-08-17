@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const MyOrders = () => {
   const [myOrders, setMyOrders] = useState([]);
@@ -15,6 +16,20 @@ const MyOrders = () => {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const cancelOrder = async (orderId) => {
+    try {
+      const { data } = await axios.put(`/api/order/${orderId}/cancel`);
+      if (data.success) {
+        toast.success("Order cancelled successfully");
+        fetchMyOrders();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -87,6 +102,17 @@ const MyOrders = () => {
               </p>
             </div>
           ))}
+
+          {/* Cancel Button */}
+          {order.status !== "Cancelled" &&
+            !["Shipped", "Delivered"].includes(order.status) && (
+              <button
+                onClick={() => cancelOrder(order._id)}
+                className="bg-red-500 text-white px-4 py-2 rounded mt-4"
+              >
+                Cancel Order
+              </button>
+            )}
         </div>
       ))}
     </div>

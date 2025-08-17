@@ -234,3 +234,51 @@ export const getAllOrders = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+// PUT /api/order/:orderId/status
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { orderId } = req.params;
+
+    const order = await Order.findById(orderId);
+    if (!order) return res.json({ success: false, message: "Order not found" });
+
+    order.status = status;
+    await order.save();
+
+    res.json({ success: true, message: "Order status updated", order });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// PUT /api/order/:orderId/cancel
+export const cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findById(orderId);
+    if (!order) return res.json({ success: false, message: "Order not found" });
+
+    // Only user who placed it can cancel
+    if (order.userId.toString() !== req.userId) {
+      return res.json({ success: false, message: "Unauthorized" });
+    }
+
+    // Restrict cancellation
+    if (["Shipped", "Delivered"].includes(order.status)) {
+      return res.json({
+        success: false,
+        message: "Order cannot be cancelled now",
+      });
+    }
+
+    order.status = "Cancelled";
+    await order.save();
+
+    res.json({ success: true, message: "Order cancelled", order });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};

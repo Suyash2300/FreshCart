@@ -7,17 +7,53 @@ const orderSchema = new mongoose.Schema(
       required: true,
       ref: "user",
     },
+    sellerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+      ref: "seller", // assuming you have a seller model
+    },
     items: [
       {
-        product: { type: String, required: true, ref: "product" },
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "product",
+          required: true,
+        },
         quantity: { type: Number, required: true },
       },
     ],
     amount: { type: Number, required: true },
-    address: { type: String, required: true, ref: "address" },
-    status: { type: String, default: "Order Placed" },
+    address: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "address",
+      required: true,
+    },
+
+    // Track status
+    status: {
+      type: String,
+      enum: ["Order Placed", "Processing", "Shipped", "Delivered", "Cancelled"],
+      default: "Order Placed",
+    },
+
+    // Who cancelled (user/seller/system)
+    cancelledBy: {
+      type: String,
+      enum: ["User", "Seller", "System", null],
+      default: null,
+    },
+
     paymentType: { type: String, required: true },
-    isPaid: { type: Boolean, required: true, default: true },
+    isPaid: { type: Boolean, required: true, default: false },
+
+    // Optional: maintain history of status changes
+    statusHistory: [
+      {
+        status: String,
+        updatedAt: { type: Date, default: Date.now },
+        updatedBy: { type: String, enum: ["User", "Seller", "System"] },
+      },
+    ],
   },
   { timestamps: true }
 );
