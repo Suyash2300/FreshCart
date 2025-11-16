@@ -28,9 +28,10 @@ const Cart = () => {
   const getCart = () => {
     let tempArray = [];
     for (const key in cartItems) {
-      const product = products.find((item) => item._id === key);
-      product.quantity = cartItems[key];
-      tempArray.push(product);
+			const product = products.find((item) => item._id === key);
+			if (!product) continue;
+			const productWithQty = { ...product, quantity: cartItems[key] };
+			tempArray.push(productWithQty);
     }
     setCartArray(tempArray);
   };

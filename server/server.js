@@ -27,6 +27,9 @@ const allowedOrigins = [
   "https://fresh-cart-snowy.vercel.app",
 ];
 
+// Disable ETag to avoid 304 on auth-dependent endpoints
+app.set("etag", false);
+
 app.post("/stripe", express.raw({ type: "application/json" }), stripeWebhooks);
 
 //Middleware configuration
@@ -45,6 +48,16 @@ app.use(
     credentials: true,
   })
 );
+
+// Prevent caching for API responses (auth-sensitive)
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/")) {
+    res.set("Cache-Control", "no-store");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+  }
+  next();
+});
 
 app.get("/", (req, res) => res.send("Api is working"));
 app.use("/api/user", userRouter);

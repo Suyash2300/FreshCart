@@ -13,35 +13,28 @@ export const AppContextProvider = ({ children }) => {
   const currency = import.meta.env.VITE_CURRENCY;
 
   const [user, setUser] = useState(null);
-  const [isSeller, setIsSeller] = useState(false);
+	const [isSeller, setIsSeller] = useState(false);
   const [showUserLogin, setShowUserLogin] = useState(false); // 🔹 NEW
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [searchQuery, setSearchQuery] = useState([]);
 
-  const fetchSeller = async () => {
-    try {
-      const { data } = await axios.get("/api/seller/is-auth");
-      if (data.success) {
-        setIsSeller(true);
-      } else {
-        setIsSeller(false);
-      }
-    } catch (error) {
-      setIsSeller(false);
-    }
-  };
+	// Seller/admin flag is derived from user role now
 
   //Fetch user auth status , user data and cart items
   const fetchUser = async () => {
     try {
-      const { data } = await axios.get("/api/user/is-auth");
+			const { data } = await axios.get("/api/user/is-auth", {
+				headers: { "Cache-Control": "no-cache" },
+			});
       if (data.success) {
         setUser(data.user);
         setCartItems(data.user.cartItems);
+				setIsSeller(data.user.role === "admin");
       }
     } catch (error) {
       setUser(null);
+			setIsSeller(false);
     }
   };
 
@@ -76,7 +69,11 @@ export const AppContextProvider = ({ children }) => {
   // Update cart item quantity
   const updateCartItems = (itemId, quantity) => {
     let cartData = structuredClone(cartItems);
-    cartData[itemId] = quantity;
+		if (quantity <= 0) {
+			delete cartData[itemId];
+		} else {
+			cartData[itemId] = quantity;
+		}
     setCartItems(cartData);
     toast.success("cart updated");
   };
@@ -108,8 +105,8 @@ export const AppContextProvider = ({ children }) => {
     let totalAmount = 0;
     for (const items in cartItems) {
       let itemInfo = products.find((product) => product._id === items);
-      if (cartItems[items] > 0) {
-        totalAmount += itemInfo.offerPrice * cartItems[items];
+			if (itemInfo && cartItems[items] > 0) {
+				totalAmount += itemInfo.offerPrice * cartItems[items];
       }
     }
     return Math.floor(totalAmount * 100) / 100;
@@ -118,7 +115,6 @@ export const AppContextProvider = ({ children }) => {
   useEffect(() => {
     fetchUser();
     fetchProducts();
-    fetchSeller();
   }, []);
 
   useEffect(() => {

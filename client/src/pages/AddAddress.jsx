@@ -45,7 +45,19 @@ const AddAddress = () => {
     e.preventDefault();
     // Submit logic here
     try {
-      const { data } = await axios.post("/api/address/add", { address });
+			const sanitized = {
+				...address,
+				firstName: address.firstName.trim(),
+				lastName: address.lastName.trim(),
+				email: address.email.trim(),
+				street: address.street.trim(),
+				city: address.city.trim(),
+				state: address.state.trim(),
+				country: address.country.trim(),
+				phone: address.phone.trim(),
+				zipcode: Number(address.zipcode),
+			};
+			const { data } = await axios.post("/api/address/add", { address: sanitized });
       if (data.success) {
         toast.success(data.message);
         navigate("/cart");
@@ -60,6 +72,8 @@ const AddAddress = () => {
   useEffect(() => {
     if (!user) {
       navigate("/cart");
+		} else if (user.email) {
+			setAddress((prev) => ({ ...prev, email: user.email }));
     }
   }, []);
 

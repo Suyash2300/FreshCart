@@ -1,5 +1,6 @@
 import express from "express";
 import authUser from "../middlewares/authUser.js";
+import authorizeRole from "../middlewares/authorizeRole.js";
 import {
   getAllOrders,
   getUserOrders,
@@ -16,9 +17,9 @@ orderRouter.post("/cod", authUser, placeOrderCOD);
 orderRouter.post("/stripe", authUser, placeOrderStripe);
 
 orderRouter.get("/user", authUser, getUserOrders);
-orderRouter.get("/seller", authSeller, getAllOrders);
+orderRouter.get("/seller", authUser, authorizeRole(["admin"]), getAllOrders);
 
-orderRouter.put("/:orderId/status", authSeller, updateOrderStatus);
+orderRouter.put("/:orderId/status", authUser, authorizeRole(["admin"]), updateOrderStatus);
 orderRouter.put("/:orderId/cancel", authUser, cancelOrder);
 
 export default orderRouter;

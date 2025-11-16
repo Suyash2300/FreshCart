@@ -33,7 +33,7 @@ export const register = async (req, res) => {
     });
     return res.json({
       success: true,
-      user: { email: user.email, name: user.name },
+      user: { email: user.email, name: user.name, role: user.role },
     });
   } catch (error) {
     console.log(error.message);
@@ -63,6 +63,9 @@ export const login = async (req, res) => {
     if (!isMatch)
       return res.json({ success: false, message: "Invalid email or password" });
 
+    // Optionally bootstrap admin by email (if matches env)
+    // Removed: admin bootstrap via env. Use DB/seed/migration for admin setup.
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
@@ -75,7 +78,7 @@ export const login = async (req, res) => {
     });
     return res.json({
       success: true,
-      user: { email: user.email, name: user.name },
+      user: { email: user.email, name: user.name, role: user.role },
     });
   } catch (error) {
     res.json({ success: false, message: error.message });
@@ -103,8 +106,8 @@ export const logout = async (req, res) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "productioon",
-      sameSite: process.env.NODE_ENV === "productioon" ? "none" : "strict",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
     });
     return res.json({ success: true, message: "Logged out" });
   } catch (error) {
@@ -131,6 +134,7 @@ export const forgotPassword = async (req, res) => {
     // Send email
     const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
+    // Nodemailer (Gmail) - original setup
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },

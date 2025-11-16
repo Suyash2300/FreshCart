@@ -58,7 +58,7 @@ const App = () => {
 
           <Route
             path="/seller"
-            element={isSeller ? <SellerLayoutPage /> : <SellerLogin />}
+            element={isSeller ? <SellerLayoutPage /> : <Home />}
           >
             <Route index element={isSeller ? <AddProduct /> : null} />
             <Route path="product-list" element={<ProductList />} />

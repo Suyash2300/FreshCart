@@ -6,7 +6,11 @@ import User from "../models/User.js";
 // place order cod : /api/order/cod
 export const placeOrderCOD = async (req, res) => {
   try {
-    const { userId, items, address } = req.body;
+		const { items, address, userId: userIdFromBody } = req.body;
+		const userId = req.userId || userIdFromBody; // prefer cookie auth, fallback to body
+		if (!userId) {
+			return res.json({ success: false, message: "Not Authorized" });
+		}
     if (!address || items.length === 0) {
       return res.json({ success: false, message: "Invalid Data" });
     }
@@ -64,7 +68,11 @@ export const placeOrderCOD = async (req, res) => {
 
 export const placeOrderStripe = async (req, res) => {
   try {
-    const { userId, items, address } = req.body;
+		const { items, address, userId: userIdFromBody } = req.body;
+		const userId = req.userId || userIdFromBody; // prefer cookie auth, fallback to body
+		if (!userId) {
+			return res.json({ success: false, message: "Not Authorized" });
+		}
     const { origin } = req.headers;
 
     if (!address || items.length === 0) {
